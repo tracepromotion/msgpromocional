@@ -1,0 +1,275 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Condomínios - Filtro Visual</title>
+  <style>
+    body {
+      margin: 0;
+      font-family: Arial, sans-serif;
+      background: linear-gradient(270deg, rgb(255, 0, 64), black);
+      background-size: 400% 400%;
+      animation: gradientBG 15s ease infinite;
+      color: white;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      padding: 20px;
+    }
+
+    @keyframes gradientBG {
+      0% { background-position: 0% 50%; }
+      50% { background-position: 100% 50%; }
+      100% { background-position: 0% 50%; }
+    }
+
+    h1 {
+      color: #fff;
+      margin-bottom: 10px;
+    }
+
+    #searchBar {
+      width: 90%;
+      max-width: 600px;
+      padding: 10px;
+      margin-bottom: 20px;
+      border-radius: 8px;
+      border: 1px solid rgb(255, 0, 76);
+      background-color: #000;
+      color: rgb(255, 0, 43);
+    }
+
+    .lista {
+      max-width: 600px;
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 8px;
+    }
+
+    button {
+      background-color: #000;
+      color: rgb(245, 241, 242);
+      border: 1px solid rgb(243, 237, 243);
+      padding: 10px;
+      border-radius: 8px;
+      cursor: pointer;
+      transition: all 0.3s ease;
+    }
+
+    button:hover {
+      background-color: magenta;
+      color: #000;
+    }
+
+    .modal {
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100vw;
+      height: 100vh;
+      background-color: rgba(0, 0, 0, 0.85);
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      z-index: 1000;
+    }
+
+    .modal-content {
+      background: white;
+      color: black;
+      padding: 20px;
+      border-radius: 12px;
+      max-width: 600px;
+      max-height: 80vh;
+      overflow-y: auto;
+      position: relative;
+      box-shadow: 0 0 20px rgb(255, 0, 0);
+    }
+
+    .modal-content pre {
+      white-space: pre-wrap;
+      word-wrap: break-word;
+      font-size: 16px;
+      font-family: Arial, sans-serif;
+    }
+
+    .close-btn, .copy-btn {
+      position: absolute;
+      background: none;
+      border: none;
+      font-size: 20px;
+      cursor: pointer;
+      color: #000;
+    }
+
+    .close-btn {
+      top: -10px;
+      right: 15px;
+    }
+
+    .copy-btn {
+      top: -10px;
+      left: 15px;
+    }
+
+    .edit-button {
+      position: fixed;
+      bottom: 20px;
+      right: 20px;
+      background-color: #fff;
+      color: rgb(255, 0, 21);
+      border-radius: 50%;
+      width: 50px;
+      height: 50px;
+      font-size: 24px;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      border: none;
+      box-shadow: 0 0 10px #000;
+      cursor: pointer;
+    }
+  </style>
+</head>
+<body>
+  <h1>Selecione um Condomínio</h1>
+  <input type="text" id="searchBar" placeholder="Pesquise o nome do condomínio..." />
+  <div class="lista" id="condominio-list"></div>
+
+  <div class="modal" id="modal" style="display:none;">
+    <div class="modal-content">
+      <button class="close-btn" onclick="fecharModal()">&times;</button>
+      <button class="copy-btn" onclick="copiarTexto()">📋</button>
+      <pre id="textoModal"></pre>
+    </div>
+  </div>
+
+  <button class="edit-button" title="Editar ✏️">✏️</button>
+
+  <script>
+    const grupos = {
+      cFcC: {
+        texto: `50% DE DESCONTO NOS 3 PRIMEIROS MESES
+
+VIVA A EXPERIÊNCIA COM O PROVEDOR MAIS BEM AVALIADO NO GOOGLE!!!
+
+* FIDELIDADE DE 12 MESES
+* SEM TAXA DE INSTALAÇÃO
+* SUPORTE REMOTO 24H
+* 100% FIBRA ÓPTICA
+* OS PLANOS NÃO SOFREM ALTERAÇÃO DE VALOR
+
+INFORMAÇÕES SOBRE A INSTALAÇÃO
+* Instalação de pontos de rede em outros cômodos ou dispositivos sem custos, no momento da instalação
+* Possibilidade de instalação de um roteador wifi adicional em outro cômodo no valor simbólico de R$ 10,00 mensais.`,
+        conds: ["Parque Iris", "Único Bonsucesso", "Spazio Life"]
+      },
+      cFsC: {
+        texto: `VIVA A EXPERIÊNCIA COM O PROVEDOR MAIS BEM AVALIADO NO GOOGLE!!!
+
+* FIDELIDADE DE 12 MESES
+* SEM TAXA DE INSTALAÇÃO
+* SUPORTE REMOTO 24H
+* 100% FIBRA ÓPTICA
+* OS PLANOS NÃO SOFREM ALTERAÇÃO DE VALOR
+
+INFORMAÇÕES SOBRE A INSTALAÇÃO
+* Instalação de pontos de rede em outros cômodos ou dispositivos sem custos, no momento da instalação
+* Possibilidade de instalação de um roteador wifi adicional em outro cômodo no valor simbólico de R$ 10,00 mensais.`,
+        conds: ["Enseada do Mar", "Esplendor Carioca", "Living Sunset", "Pátio Engenho Novo", "Praia Formosa", "Rio Wonder Mauá", "Rio Wonder Cais", "Spazio Life", "Spazio Rockfeller", "Spazio Roosevelt", "Torres do Méier", "Único Bonsucesso", "Brito I", "Brito II", "Jardim dos Ipês I", "Jardim dos Ipês II", "Jardim dos Ipês III", "Novola", "Vargem Grande", "Novolar Recreio", "Orla Recreio Grumari", "Orla Recreio Prainha", "Parque I", "Reserva Pontal", "Resid. Pedra de Guaratiba", "Residencial Ipês", "Vitale Eco", "Viva Vida Moinho", "Varandas do Park", "Viva Vida Santa Cruz", "Viver Mais Campo Grande"]
+      },
+      sFcC: {
+        texto: `50% DE DESCONTO NOS 3 PRIMEIROS MESES
+
+VIVA A EXPERIÊNCIA COM O PROVEDOR MAIS BEM AVALIADO NO GOOGLE!!!
+
+* SEM FIDELIDADE
+* SEM TAXA DE INSTALAÇÃO
+* SUPORTE REMOTO 24H
+* 100% FIBRA ÓPTICA
+* OS PLANOS NÃO SOFREM ALTERAÇÃO DE VALOR
+
+INFORMAÇÕES SOBRE A INSTALAÇÃO
+* Instalação de pontos de rede em outros cômodos ou dispositivos sem custos, no momento da instalação
+* Possibilidade de instalação de um roteador wifi adicional em outro cômodo no valor simbólico de R$ 10,00 mensais.`,
+        conds: ["Completo Bonsucesso", "Flores 1", "Flores 2", "Mérito Zona Norte", "Carioca Park", "Flor d", "Laranjeira", "Parque II", "Parque Violeta", "Vivaz Magarça"]
+      },
+      sFsC: {
+        texto: `VIVA A EXPERIÊNCIA COM O PROVEDOR MAIS BEM AVALIADO NO GOOGLE!!!
+
+* SEM FIDELIDADE
+* SEM TAXA DE INSTALAÇÃO
+* SUPORTE REMOTO 24H
+* 100% FIBRA ÓPTICA
+* OS PLANOS NÃO SOFREM ALTERAÇÃO DE VALOR
+
+INFORMAÇÕES SOBRE A INSTALAÇÃO
+* Instalação de pontos de rede em outros cômodos ou dispositivos sem custos, no momento da instalação
+* Possibilidade de instalação de um roteador wifi adicional em outro cômodo no valor simbólico de R$ 10,00 mensais.`,
+        conds: ["Alto São Cristóvão", "Vivaz Marechal Rondon", "Dez Ramos", "Vivaz Ramos", "Completo Engenho Novo", "Viva Mais Engenho Novo", "Completo Piedade", "Dez Bonsucesso", "Dez Irajá", "Dez Zona Norte", "Living Choice", "Retiro dos Pinheiro", "Único Engenho Novo", "Urban São Cristóvão", "Urban Zona Norte", "Vivaz Piedade", "Viva Vida Zona Norte", "Florença", "Hibisco", "Jasmim", "Lírios I", "Lírios II", "Naturalis", "Novitá", "Parque I", "Parque Tulipa", "Quinta do Ipê", "Recanto da Colina", "Recanto da Serra", "Recanto das Flores", "Recanto Verde", "Rio Araras", "Rio Bossa Nova", "Rio Jazz", "Rio Mantiqueira", "Rio Oceane", "Rio Rock", "Royal Blue", "Ventura", "Verona", "Villagio Silvestre", "Viva Vida Felicidade", "Viva Vida Harmonia", "Viva Vida Recanto", "West Garden"]
+      },
+      sFcC: {
+        texto: `ESCOLHA SEU PLANO E A PROMOÇÃO QUE DESEJA ADQUIRIR:
+
+A) 3 MESES DE ISENÇÃO COM 12 MESES DE FIDELIDADE.
+B) SEM ISENÇÃO COM PAGAMENTO 30 DIAS PÓS INSTALAÇÃO.
+
+AS OPÇÕES ACOMPANHAM:
+* SEM TAXA DE INSTALAÇÃO
+* SUPORTE REMOTO 24H
+* 100% FIBRA ÓPTICA
+* OS PLANOS NÃO SOFREM ALTERAÇÃO DE VALOR
+
+INFORMAÇÕES SOBRE A INSTALAÇÃO
+* Instalação de pontos de rede em outros cômodos ou dispositivos sem custos, no momento da instalação
+* Possibilidade de instalação de um roteador wifi adicional em outro cômodo no valor simbólico de R$ 10,00 mensais.`,
+        conds: ["Atmosfera", "Apogeu", "Stillo"]
+      }
+    };
+
+    const lista = document.getElementById("condominio-list");
+    const searchBar = document.getElementById("searchBar");
+    const textoModal = document.getElementById("textoModal");
+    const modal = document.getElementById("modal");
+
+    const condominioToGrupo = {};
+    for (const grupo in grupos) {
+      grupos[grupo].conds.forEach(nome => {
+        condominioToGrupo[nome.toLowerCase()] = grupo;
+      });
+    }
+
+    const todosCondominios = Object.keys(condominioToGrupo).sort();
+
+    todosCondominios.forEach(nome => {
+      const btn = document.createElement("button");
+      btn.innerText = nome;
+      btn.onclick = () => abrirModal(nome);
+      lista.appendChild(btn);
+    });
+
+    searchBar.addEventListener("input", e => {
+      const query = e.target.value.toLowerCase();
+      [...lista.children].forEach(btn => {
+        btn.style.display = btn.innerText.toLowerCase().includes(query) ? "block" : "none";
+      });
+    });
+
+    function abrirModal(nome) {
+      const grupo = condominioToGrupo[nome.toLowerCase()];
+      textoModal.innerText = grupos[grupo].texto;
+      modal.style.display = "flex";
+    }
+
+    function fecharModal() {
+      modal.style.display = "none";
+    }
+
+    function copiarTexto() {
+      navigator.clipboard.writeText(textoModal.innerText);
+      alert("Texto copiado!");
+    }
+  </script>
+</body>
+</html>
