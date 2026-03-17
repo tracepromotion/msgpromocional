@@ -1,0 +1,254 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Sistema de Atendimento</title>
+  <style>
+    body {
+      margin: 0;
+      font-family: Arial, sans-serif;
+      height: 100vh;
+      display: flex;
+      flex-direction: column;
+    }
+
+    header {
+      background: linear-gradient(90deg, #000000, #00e676, #000000);
+      background-size: 300% 300%;
+      animation: gradientFlow 6s ease infinite;
+      padding: 20px;
+      text-align: center;
+    }
+
+    header h1 {
+      color: white;
+      font-weight: bold;
+      font-size: 24px;
+      margin: 0;
+      letter-spacing: 1px;
+    }
+
+    @keyframes gradientFlow {
+      0% { background-position: 0% 50%; }
+      50% { background-position: 100% 50%; }
+      100% { background-position: 0% 50%; }
+    }
+
+    .container {
+      flex: 1;
+      display: flex;
+      background-color: #2e7d32;
+      padding: 20px;
+      box-sizing: border-box;
+      gap: 20px;
+    }
+
+    .sidebar {
+      width: 300px;
+      background-color: #1b5e20;
+      padding: 20px;
+      box-sizing: border-box;
+      display: flex;
+      flex-direction: column;
+      gap: 10px;
+      border-radius: 8px;
+      height: fit-content;
+    }
+
+    .sidebar button {
+      background-color: transparent;
+      color: white;
+      border: 2px solid white;
+      padding: 12px;
+      font-size: 16px;
+      cursor: pointer;
+      text-align: left;
+      transition: background 0.3s;
+      border-radius: 5px;
+    }
+
+    .sidebar button:hover {
+      background-color: rgba(255, 255, 255, 0.1);
+    }
+
+    .message-box {
+      display: none;
+      background-color: white;
+      border-radius: 8px;
+      padding: 5px;
+      box-sizing: border-box;
+      box-shadow: 0 0 10px rgba(0,0,0,0.2);
+      animation: slideIn 0.4s ease forwards;
+      max-width: 600px;
+      position: relative;
+    }
+
+    @keyframes slideIn {
+      from { transform: translateX(-30px); opacity: 0; }
+      to { transform: translateX(0); opacity: 1; }
+    }
+
+    .controls {
+      display: flex;
+      justify-content: flex-end;
+      gap: 5px;
+      margin-bottom: 5px;
+    }
+
+    .controls button {
+      background-color: #e0e0e0;
+      border: none;
+      padding: 6px 10px;
+      cursor: pointer;
+      border-radius: 4px;
+      font-size: 14px;
+    }
+
+    .message-content {
+  white-space: pre-wrap;
+  font-size: 16px;
+  color: #333;
+  padding: 5px;
+}
+  </style>
+</head>
+<body>
+
+  <header>
+    <h1>ATENDIMENTO TRACECOM</h1>
+  </header>
+
+  <div class="container">
+    <div class="sidebar">
+      <button onclick="showMessage(0)">Saudação + Imagem</button>
+      <button onclick="showMessage(1)">Cliente demorando</button>
+      <button onclick="showMessage(2)">Ofertar TV</button>
+      <button onclick="showMessage(3)">Aplicativos</button>
+      <button onclick="showMessage(4)">Confirmação do Plano</button>
+      <button onclick="showMessage(5)">Vencimento da Fatura</button>
+      <button onclick="showMessage(6)">Fidelidade Explicação</button>
+      <button onclick="showMessage(7)">Horário Marcado</button>
+      <button onclick="showMessage(8)">Coleta de Dados</button>
+      <button onclick="showMessage(9)">Agendamento p/ Amanhã</button>
+      <button onclick="showMessage(10)">Agendamento para 48h</button>
+      <button onclick="showMessage(11)">Confirmar Agendamento</button>
+      <button onclick="showMessage(12)">Trace Canais</button>
+      <button onclick="showMessage(13)">Jornada DC</button>
+      <button onclick="showMessage(14)">Pós Venda</button>
+    </div>
+
+    <div class="message-box" id="messageBox">
+      <div class="controls">
+        <button onclick="copyText()">Copiar</button>
+        <button onclick="closeBox()">Fechar</button>
+      </div>
+      <div class="message-content" id="messageContent"></div>
+    </div>
+  </div>
+
+  <script>
+    const messages = [
+      `Olá, tudo bem ? 
+Segue abaixo os planos disponíveis em sua região:`,
+
+      `O que o senhor(a) procura em um plano de Internet hoje ? 😄  
+Alta velocidade ? Internet + Tv ? Streamings ? Preço ?.`,
+
+      `Gostaria de adquirir nosso Pacote Premium de TV ? 
+      
+* São mais de 200 canais;
+* 5 Telas simultâneas;
+* Funciona em Smar Tv, Celular, Tablet, PC, e etc...
+* Sem Fidelidade, podendo cancelar a qualquer momento. `,
+
+      `Temos aplicativos de Streaming e Telemedicina, dentre eles os mais solicitados: DISNEY+ e HBO Max.
+* Comprando pela Tracecom -> HBOMax (PADRÃO): R$ 29,99 
+* Comprando pelo Site            -> HBOMax (PADRÃO): R$ 44,90 
+       site: https://auth.hbomax.com/product
+
+* Comprando pela Tracecom -> Disney+ (PADRÃO): R$ 29,99 
+* Comprando pelo Site            -> Disney+ (PADRÃO): R$ 46,90
+        site: https://www.disneyplus.com/pt-br
+
+*Sim, nossos preços são melhores e os app's não possuem fidelidade, podendo ser retirados do plano a qualquer momento. 
+Deseja incluir algum deles no seu plano hoje ?*`,
+
+      `Perfeito! Então sua escolha será o plano de XXMB + XX por R$ XX,XX com fidelidade. Correto ? 
+Só confirma aqui pra gente, por gentileza😊`,
+
+      `O vencimento corresponde a data da instalação, por exemplo, se a internet for instalada amanhã (DATA) o vencimento da fatura será todo dia X dos próximos meses. Lembrando que o cliente pode solicitar a mudança de vencimento após o pagamento da primeira fatura, e a primeira fatura vence só 30 dias após a instalação.`,
+
+      `Entendo perfeitamente sua colocação, e até por isso gosto de explicar com clareza: a fidelidade não é algo exclusivo nosso, ela existe em praticamente todas as grandes operadoras do país justamente para garantir condições melhores para o cliente.
+É através dela que é possível negociar benefícios, promoções e descontos para os clientes. 
+
+E reforçando: a qualidade e a entrega do nosso serviço não estão atreladas a isso, prova disso são as avaliações no Google de clientes satisfeitos que continuam conosco até mesmo após o período de fidelidade.`,
+
+      `Não conseguimos agendar horário exato, pois se trata de um serviço externo e imprevistos podem acontecer durante o dia, como trânsito, incidentes ou atrasos em outras visitas.
+
+
+Para ajudar, avisamos cerca de 1 hora antes da chegada do técnico, dando tempo para o cliente se deslocar até o condomínio. Podemos prosseguir dessa forma? 😊`,
+
+      `Ótimo! Agora para realizarmos o seu cadastro e agendamento basta nos enviar os seus seguintes dados: 
+-Nome Completo:
+-CPF:
+-Data de Nascimento:
+-Gênero:
+-Bloco e Apto.:
+-E-mail:
+-Contato para Ligação:`,
+
+      `Obrigado! Em relação a sua instalação conseguimos um Encaixe para *amanhã em horário Comercial (9h às 18h)* Pode ser ?`,
+
+      `Olha, a data mais próxima que temos aqui é com prazo muito longo, porém conversei com a Supervisão e conseguimos um Encaixe para [DATA] em horário Comercial, pode ser ?`,
+
+      `Instalação agendada para: [DIA} (X/X). 
+Período: [PERÍODO] (Xh às Xh). 
+Protocolo: [X]
+
+-Lembrando que a sua data de vencimento é de acordo com sua data de instalação.  
+
+-Por favor, é necessário ter um maior de 18 anos no local para acompanhar o técnico no momento da instalação, tirar dúvidas e realizar testes em seus dispositivos. 
+
+Caso tenha algum imprevisto que lhe impeça de receber o técnico, nos informe para que a visita seja cancelada, por gentileza.
+
+⚠️ Importante: O limite de espera para o dia do seu agendamento (visita técnica, instalação e Retirada de equipamentos) é de: 15 (quinze) minutos.
+
+Caso o técnico chegue e o local não esteja liberado ou a pessoa responsável não esteja disponível após esse período, o agendamento poderá ser automaticamente reagendado, sujeitando-se à nova disponibilidade na agenda.`,
+
+      `Segue abaixo os detalhes do TRACE CANAIS, *nossa TV por aplicativo*, incluso gratuitamente no seu plano.
+No material você verá os canais disponíveis, TVs compatíveis e como acessar.`,
+
+      `⚠️Segue abaixo um conteúdo com as principais coisas que você precisa saber sobre seu Plano, Fatura e Conexão: 
+ATENÇÃO: É importante que assista até o final para evitar dúvidas futuras.`,
+
+      `Olá, Sr(a). XXXX, tudo bem ? 
+Estou entrando em contato para verificar se ocorreu tudo bem na instalação. Gostaria de deixar alguma reclamação ou elogio para o Técnico ou Empresa ?
+
+Além disso gostaria de reforçar que a sua fatura vence 30 dias após a instalação, e a fatura chegará 10 dias antes do vencimento no e-mail cadastrado, Ok ? 
+Caso queira mudar o vencimento, basta realizar o pagamento da primeira fatura e retornar o contato aqui para solicitar a mudança do vencimento com o setor "Financeiro". 
+
+E qualquer dúvida, problema ou solicitação, o nosso Suporte Remoto funciona 24h todos os dias, não exite em nos mandar mensagem neste mesmo número independente da hora, Ok ?`
+    ];
+
+    function showMessage(index) {
+      const box = document.getElementById('messageBox');
+      const content = document.getElementById('messageContent');
+      content.textContent = messages[index];
+      box.style.display = 'inline-block';
+    }
+
+    function closeBox() {
+      const box = document.getElementById('messageBox');
+      box.style.display = 'none';
+    }
+
+    function copyText() {
+      const text = document.getElementById('messageContent').textContent;
+      navigator.clipboard.writeText(text).then(() => {
+        alert("Texto copiado com sucesso!");
+      });
+    }
+  </script>
+</body>
+</html>
